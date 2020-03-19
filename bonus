@@ -1,0 +1,83 @@
+import main
+import numpy as np
+import matplotlib.pyplot as plt
+
+def bonus():
+    n = 7
+    # k = 4
+    # r = 4
+    # d = 3
+    #
+    # g = [1, 0, 1, 1]
+
+    k = 3
+    g = [1, 1, 1, 0, 1]
+    d = 4
+
+    for l in range(-int(k) + 1, 10):
+        print("l ", l)
+        stat = [0] * (n + 1 + l)
+
+        # calculate statistic
+        for i in range(2**(k + l)):
+            m = list('{0:b}'.format(i))
+            #print(m)
+            m = np.array(['0'] * (k + l - len(m)) + m).astype("int32")
+            m = list(m)
+            #print(m)
+            code = main.gen(m, g, len(g) - 1)
+            print(m, code, main.div(code.copy(), g))
+            stat[sum(code)] += 1
+        print("real", stat)
+        stat = np.array(stat)
+        #d = np.argmin(stat)
+        d = 1
+        max_val = 1000000
+        for idx, val in enumerate(stat[1:]):
+            if val == 0:
+                continue
+            if val < max_val:
+                max_val = val
+                d = idx + 1
+                break
+
+        print("d", d)
+        result = []
+        # calculate exact boundary
+        for p in np.linspace(0.1, 1, 100):
+            i = d
+            res = 0
+            for ai in stat[d:]:
+                if p == 1:
+                    f = 0
+                res += ai * p ** i * (1 - p) ** (n + l - i)
+                i = i + 1
+            result.append(res)
+            #print(p_arr)
+
+        result_upperb = []
+        stat = np.array([main.binomial(n + l, x) for x in range(0, d)])
+        print("binom", stat)
+        # calculate upper bound
+        for p in np.linspace(0.1, 1, 100):
+            i = 0
+            res = 0
+            for ai in stat:
+                if p == 1:
+                    f = 0
+                res += ai * p ** i * (1 - p) ** (n + l - i)
+                i = i + 1
+            result_upperb.append(1 - res)
+            #print(p_arr)
+        print('\n')
+        print("plot...")
+        label = "or total len = " + str(n + l) + "; min distance = " + str(d) + "; bonus bits = " + str(l) + "; k = " + str(k)
+        plt.title(label)
+        plt.plot(np.linspace(0.1, 1, 100), result, "*")
+        #plt.show()
+        plt.plot(np.linspace(0.1, 1, 100), result_upperb, "-")
+        plt.savefig(label + ".png")
+        plt.show()
+
+
+bonus()
